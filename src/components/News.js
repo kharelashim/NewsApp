@@ -55,16 +55,6 @@ export class News extends Component {
         this.updateNews();
     }
 
-    // handlePrevClick = () => {
-    //     console.log("prevClick");
-    //     this.setState(prevState => ({ page: prevState.page - 1 }), this.updateNews);
-    // }
-
-    // handleNextClick = () => {
-    //     console.log("NextClick");
-    //     this.setState(prevState => ({ page: prevState.page + 1 }), this.updateNews);
-    // }
-
     fetchMoreData = async () => {
         this.setState({ page: this.state.page + 1 })
         console.log("FetchMorenews")
@@ -85,33 +75,32 @@ export class News extends Component {
     render() {
         return (
             <>
-            <h1 style={{ margin: '20px 50px 60px 10px', textAlign: 'center', color: '#103589', fontWeight: 'bold', fontSize: '50px' }}>NewsPortal - Top Headlines from {this.capitalizeFirstLetter(this.props.category)} News</h1>
-                { /* {this.state.loading && <Spinner/>}   */}
-        <InfiniteScroll
-            dataLength={this.state.articles.length}
-            next={this.fetchMoreData}
-            hasMore={this.state.articles.length !== this.state.totalResults}
-            loader={<Spinner />}
-        >
-            <div className="container">
-                <div className="row">
-                    {this.state.articles.map((element) => {
-                        return <div className="col md-4" style={{ marginBottom: '20px' }} key={element.url} >
-                            <NewsItem 
-                            title={element.title ? element.title.slice(0, 40) : ""} 
-                            description={element.description ? element.description.slice(0, 55) : "There is no description for this in my api"} 
-                            imageUrl={element.urlToImage} 
-                            newsUrl={element.url} 
-                            author={element.author} 
-                            date={element.publishedAt} s
-                            ource={element.source.name} />
+                <h1 style={{ margin: '20px 50px 60px 10px', textAlign: 'center', color: '#103589', fontWeight: 'bold', fontSize: '50px' }}>NewsPortal - Top Headlines from {this.capitalizeFirstLetter(this.props.category)} News</h1>
+                <InfiniteScroll style={{overflow: 'visible'}}
+                    dataLength={this.state.articles.length}
+                    next={this.fetchMoreData}
+                    hasMore={this.state.articles.length !== this.state.totalResults}
+                    loader={<Spinner />}
+                >
+                    <div className="container">
+                        <div className="row">
+                            {this.state.articles.map((element) => {
+                                return <div className="col md-4" style={{ marginBottom: '20px' }} key={element.url} >
+                                    <NewsItem
+                                        title={element.title ? element.title.slice(0, 40) : ""}
+                                        description={element.description ? element.description.slice(0, 55) : "There is no description for this in my api"}
+                                        imageUrl={element.urlToImage}
+                                        newsUrl={element.url}
+                                        author={element.author}
+                                        date={element.publishedAt} 
+                                        source={element.source.name} />
+                                </div>
+                            })}
                         </div>
-                    })}
-                </div>
-            </div>
+                    </div>
 
-        </InfiniteScroll>
-        </>
+                </InfiniteScroll>
+            </>
         )
     }
 }

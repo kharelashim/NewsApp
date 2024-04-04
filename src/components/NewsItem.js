@@ -14,7 +14,7 @@ export class NewsItem extends Component {
             style={{ height: '200px', objectFit: 'cover' }} 
           />
                 <div className="card-body">
-                      <span className="position-absolute top-0  translate-middle badge rounded-pill bg-danger" style={{zIndex: '1', left: '80% '}}> {source}
+                      <span className="position-absolute top-0  translate-middle badge rounded-pill " style={{zIndex: '1', left: '80% ', background: 'rgb(16, 53, 137)'}}> {source}
                       </span> 
                     <h5 className="card-title">{title}   
                     </h5>
