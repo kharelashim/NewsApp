@@ -35,20 +35,25 @@ export class News extends Component {
     }
 
     async updateNews() {
+        this.props.setProgress(10);
         console.log("updatenews")
         const url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=0308b5ec401147a7a4515e071083ff8f&page=${this.state.page}&pageSize=${this.props.pageSize}`;
         this.setState({
             loading: true
         });
+    
         let data = await fetch(url);
-        let parseData = await data.json()
+        this.props.setProgress(30)
+        let parseData = await data.json();
+        this.props.setProgress(70);
         this.setState({
             articles: parseData.articles,
             totalResults: parseData.totalResults,
             loading: false
-        })
+        });
+        this.props.setProgress(100);
     }
-
+    
 
     async componentDidMount() {
         console.log("componentDidMount")
@@ -59,16 +64,14 @@ export class News extends Component {
         this.setState({ page: this.state.page + 1 })
         console.log("FetchMorenews")
         const url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=0308b5ec401147a7a4515e071083ff8f&page=${this.state.page}&pageSize=${this.props.pageSize}`;
-        this.setState({
-            loading: true
-        });
+
         let data = await fetch(url);
         let parseData = await data.json()
         this.setState({
             articles: this.state.articles.concat(parseData.articles),
             totalResults: parseData.totalResults,
-            loading: false
-        })
+            loading: false,
+        })  
     };
 
 
@@ -76,7 +79,8 @@ export class News extends Component {
         return (
             <>
                 <h1 style={{ margin: '20px 50px 60px 10px', textAlign: 'center', color: '#103589', fontWeight: 'bold', fontSize: '50px' }}>NewsPortal - Top Headlines from {this.capitalizeFirstLetter(this.props.category)} News</h1>
-                <InfiniteScroll style={{overflow: 'visible'}}
+                {this.state.loading && <Spinner />}
+                <InfiniteScroll style={{ overflow: 'visible' }}
                     dataLength={this.state.articles.length}
                     next={this.fetchMoreData}
                     hasMore={this.state.articles.length !== this.state.totalResults}
@@ -84,18 +88,19 @@ export class News extends Component {
                 >
                     <div className="container">
                         <div className="row">
-                            {this.state.articles.map((element) => {
-                                return <div className="col md-4" style={{ marginBottom: '20px' }} key={element.url} >
+                            {this.state.articles.map((element, index) => {
+                                return <div className="col md-4" style={{ marginBottom: '20px' }} key={`${element.url}-${index}`}>
                                     <NewsItem
                                         title={element.title ? element.title.slice(0, 40) : ""}
                                         description={element.description ? element.description.slice(0, 55) : "There is no description for this in my api"}
                                         imageUrl={element.urlToImage}
                                         newsUrl={element.url}
                                         author={element.author}
-                                        date={element.publishedAt} 
+                                        date={element.publishedAt}
                                         source={element.source.name} />
                                 </div>
                             })}
+
                         </div>
                     </div>
 
