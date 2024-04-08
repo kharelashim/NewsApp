@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { useEffect, useState} from 'react'
 import NewsItem from './NewsItem'
 import Spinner from './Spinner';
 import PropTypes from 'prop-types'
@@ -6,89 +6,64 @@ import InfiniteScroll from "react-infinite-scroll-component";
 
 
 
-export class News extends Component {
-    static defaultProps = {
-        country: "in",
-        pageSize: 12,
-        category: "general"
-    }
+const News = (props) => {
+    const [articles, setArticles] = useState([])
+    const [loading, setLoading] = useState(false)
+    const [page, setPage] = useState(1)
+    const [totalResults, setTotalResults] = useState(0)
+    // document.title = `${this.capitalizeFirstLetter(props.category)} - NewsPortal`;
 
-    static propTypes = {
-        country: PropTypes.string,
-        pageSize: PropTypes.number,
-        category: PropTypes.string,
-    }
 
-    capitalizeFirstLetter = (string) => {
+   const capitalizeFirstLetter = (string) => {
         return string.charAt(0).toUpperCase() + string.slice(1);
     }
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            articles: [],
-            loading: false,
-            page: 1,
-            totalResults: 0
-        }
-        document.title = `${this.capitalizeFirstLetter(this.props.category)} - NewsPortal`;
-    }
 
-    async updateNews() {
-        this.props.setProgress(10);
+   const updateNews = async() => {
+        props.setProgress(10);
         console.log("updatenews")
-        const url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=0308b5ec401147a7a4515e071083ff8f&page=${this.state.page}&pageSize=${this.props.pageSize}`;
-        this.setState({
-            loading: true
-        });
-    
+        const url = `https://newsapi.org/v2/top-headlines?country=${props.country}&category=${props.category}&apiKey=${props.apiKey}&page=${page}&pageSize=${props.pageSize}`;
+        setLoading(true)
         let data = await fetch(url);
-        this.props.setProgress(30)
+        props.setProgress(30)
         let parseData = await data.json();
-        this.props.setProgress(70);
-        this.setState({
-            articles: parseData.articles,
-            totalResults: parseData.totalResults,
-            loading: false
-        });
-        this.props.setProgress(100);
+        props.setProgress(60);
+        setArticles(parseData.articles)
+        setTotalResults(parseData.totalResults)
+        setLoading(false)
+        props.setProgress(100);
     }
     
+    useEffect(() => {
+        updateNews();
+    },[])  
 
-    async componentDidMount() {
-        console.log("componentDidMount")
-        this.updateNews();
-    }
-
-    fetchMoreData = async () => {
-        this.setState({ page: this.state.page + 1 })
-        console.log("FetchMorenews")
-        const url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=0308b5ec401147a7a4515e071083ff8f&page=${this.state.page}&pageSize=${this.props.pageSize}`;
+    const fetchMoreData = async () => {
+        const nextPage = page + 1; 
+        setPage(nextPage);
+        const url = `https://newsapi.org/v2/top-headlines?country=${props.country}&category=${props.category}&apiKey=${props.apiKey}&page=${nextPage}&pageSize=${props.pageSize}`;
 
         let data = await fetch(url);
         let parseData = await data.json()
-        this.setState({
-            articles: this.state.articles.concat(parseData.articles),
-            totalResults: parseData.totalResults,
-            loading: false,
-        })  
+        setArticles(articles.concat(parseData.articles))
+        setTotalResults(parseData.totalResults)
+        setLoading(false)
     };
 
-
-    render() {
+    
         return (
             <>
-                <h1 style={{ margin: '20px 50px 60px 10px', textAlign: 'center', color: '#103589', fontWeight: 'bold', fontSize: '50px' }}>NewsPortal - Top Headlines from {this.capitalizeFirstLetter(this.props.category)} News</h1>
-                {this.state.loading && <Spinner />}
+                <h1 style={{ margin: '20px 50px 60px 10px', textAlign: 'center', color: '#103589', fontWeight: 'bold', fontSize: '50px' }}>NewsPortal - Top Headlines from {capitalizeFirstLetter(props.category)} News</h1>
+                {loading && <Spinner />}
                 <InfiniteScroll style={{ overflow: 'visible' }}
-                    dataLength={this.state.articles.length}
-                    next={this.fetchMoreData}
-                    hasMore={this.state.articles.length !== this.state.totalResults}
+                    dataLength={articles.length}
+                    next={fetchMoreData}
+                    hasMore={articles.length !== totalResults}
                     loader={<Spinner />}
                 >
                     <div className="container">
                         <div className="row">
-                            {this.state.articles.map((element, index) => {
+                            {articles.map((element, index) => {
                                 return <div className="col md-4" style={{ marginBottom: '20px' }} key={`${element.url}-${index}`}>
                                     <NewsItem
                                         title={element.title ? element.title.slice(0, 40) : ""}
@@ -107,7 +82,17 @@ export class News extends Component {
                 </InfiniteScroll>
             </>
         )
-    }
+}
+
+News.defaultProps = {
+    country: 'in',
+    pageSize: 8,
+    category: 'general',
+}
+News.propTypes = {
+    country: PropTypes.string,
+    pageSize: PropTypes.number,
+    category: PropTypes.string,
 }
 
 export default News
